@@ -9,18 +9,21 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
-
+// DÚ - aby se dal otevřít uloženej soubor, ať kreslí čáry
 namespace VectorEditor_IT3B
 {
     public partial class Form1 : Form
     {
-        List<PointF> points;
-        Point mousePoint;
+        Shapes selectedShape = Shapes.None;
+        List<Shape> shapes;
+        System.Drawing.Point mousePoint;
+        Color defaultButtonColor;
 
         public Form1()
         {
             InitializeComponent();
-            points = new List<PointF>();
+            shapes = new List<Shape>();
+            defaultButtonColor = btnLine.BackColor;
         }
 
         private void pboxCanvas_MouseMove(object sender, MouseEventArgs e)
@@ -32,31 +35,21 @@ namespace VectorEditor_IT3B
 
         private void pboxCanvas_MouseClick(object sender, MouseEventArgs e)
         {
-            points.Add(e.Location);
+            shapes.Add(new Point(e.Location.X, e.Location.Y));
             pboxCanvas.Refresh();
         }
 
         private void pboxCanvas_Paint(object sender, PaintEventArgs e)
         {
-            if (points.Count > 2)
+            foreach (var shape in shapes)
             {
-                e.Graphics.DrawLines(Pens.Black, points.ToArray());
+                shape.Draw(e.Graphics);
             }
-            foreach (var point in points)
-            {
-                DrawPoint(e.Graphics, point);
-            }
-        }
-
-        private void DrawPoint(Graphics g, PointF point)
-        {
-            int size = 10;
-            g.FillEllipse(Brushes.Blue, point.X - size / 2, point.Y - size / 2, size, size);
         }
 
         private void sfd_FileOk(object sender, CancelEventArgs e)
         {
-            var json = JsonConvert.SerializeObject(points/*, Formatting.Indented*/);
+            var json = JsonConvert.SerializeObject(shapes/*, Formatting.Indented*/);
             File.WriteAllText(sfd.FileName, json);
         }
 
@@ -77,13 +70,27 @@ namespace VectorEditor_IT3B
             try
             {
                 var json = File.ReadAllText(ofd.FileName);
-                points = JsonConvert.DeserializeObject<List<PointF>>(json);
+                shapes = JsonConvert.DeserializeObject<List<Shape>>(json);
                 pboxCanvas.Refresh();
             }
             catch
             {
                 MessageBox.Show("Nepodařilo se otevřít.");
             }
+        }
+
+        private void btnPoint_Click(object sender, EventArgs e)
+        {
+            selectedShape = Shapes.Point;
+            btnPoint.BackColor = Color.LightBlue;
+            btnLine.BackColor = defaultButtonColor; // knowcolor - systémové barvy
+        }
+
+        private void btnLine_Click(object sender, EventArgs e)
+        {
+            selectedShape = Shapes.Line;
+            btnLine.BackColor = Color.LightBlue;
+            btnPoint.BackColor = defaultButtonColor;
         }
     }
 }

@@ -39,7 +39,7 @@ namespace VectorEditor_IT3B
 
         public override void Draw(Graphics graphics)
         {
-            
+            graphics.FillEllipse(new SolidBrush(Color), X - Diameter / 2, Y - Diameter / 2, Diameter, Diameter);
         }
 
     }
