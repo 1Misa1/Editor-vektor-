@@ -5,7 +5,7 @@ using System.Text;
 
 namespace VectorEditor_IT3B
 {
-    public abstract class Line : Shape
+    public class Line : Shape
     {
 
 
@@ -14,7 +14,7 @@ namespace VectorEditor_IT3B
         public Color Color { get; set; }
         public int LineWidth { get; set; }
 
-        protected Line(Point point1, Point point2)
+        public Line(Point point1, Point point2)
         {
             Point1 = point1;
             Point2 = point2;

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
+// udělat kruh point - canterpoint, float - radius, color - color potřebujeme drawelipse
 // DÚ - aby se dal otevřít uloženej soubor, ať kreslí čáry
 namespace VectorEditor_IT3B
 {
@@ -16,8 +17,10 @@ namespace VectorEditor_IT3B
     {
         Shapes selectedShape = Shapes.None;
         List<Shape> shapes;
+        Line tempLine;
         System.Drawing.Point mousePoint;
         Color defaultButtonColor;
+        bool firstClick = true;
 
         public Form1()
         {
@@ -30,13 +33,38 @@ namespace VectorEditor_IT3B
         {
             this.Text = e.Location.ToString();
             mousePoint = e.Location;
-            //pboxCanvas.Refresh();
+            if (tempLine != null)
+            {
+                tempLine.Point2 = new Point(e.X, e.Y);
+            }
+            
+            pboxCanvas.Refresh();
         }
 
         private void pboxCanvas_MouseClick(object sender, MouseEventArgs e)
         {
-            shapes.Add(new Point(e.Location.X, e.Location.Y));
+            if (selectedShape == Shapes.Point)
+            {
+                shapes.Add(new Point(e.Location.X, e.Location.Y));
+            }
+            else if (selectedShape == Shapes.Line)
+            {
+                if(firstClick)
+                {
+                    firstClick = false;
+                    tempLine = new Line(new Point(e.X, e.Y), new Point(e.X, e.Y));
+                }
+                else
+                {
+                    firstClick = true;
+                    tempLine.Point2 = new Point(e.X, e.Y);
+                    shapes.Add(tempLine);
+                    tempLine = null;
+                }
+                    
+            }
             pboxCanvas.Refresh();
+
         }
 
         private void pboxCanvas_Paint(object sender, PaintEventArgs e)
@@ -44,6 +72,11 @@ namespace VectorEditor_IT3B
             foreach (var shape in shapes)
             {
                 shape.Draw(e.Graphics);
+                
+            }
+            if (tempLine != null)
+            {
+                tempLine.Draw(e.Graphics);
             }
         }
 
@@ -69,6 +102,15 @@ namespace VectorEditor_IT3B
         {
             try
             {
+
+                /* foreach(var shape in shapes)
+                {
+                    if(shape.GetType() == typeof(Point))
+                    {
+
+                    }
+                }
+                */
                 var json = File.ReadAllText(ofd.FileName);
                 shapes = JsonConvert.DeserializeObject<List<Shape>>(json);
                 pboxCanvas.Refresh();
